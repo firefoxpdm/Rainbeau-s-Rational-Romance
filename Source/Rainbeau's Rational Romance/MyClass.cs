@@ -1,4 +1,4 @@
-﻿using Harmony;
+﻿using HarmonyLib;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -17,7 +17,7 @@ namespace RationalRomance_Code {
 		public override string SettingsCategory() { return "RRR.RationalRomance".Translate(); }
 		public override void DoSettingsWindowContents(Rect canvas) { Settings.DoWindowContents(canvas); }
 		public Controller(ModContentPack content) : base(content) {
-			HarmonyInstance harmony = HarmonyInstance.Create("net.rainbeau.rimworld.mod.rationalromance");
+			Harmony harmony = new Harmony("net.rainbeau.rimworld.mod.rationalromance");
 			harmony.PatchAll( Assembly.GetExecutingAssembly() );
 			Settings = GetSettings<Settings>();
 		}
@@ -989,7 +989,7 @@ namespace RationalRomance_Code {
 			if (__result.StageIndex != ThoughtState.Inactive.StageIndex) {
 				DirectPawnRelation directPawnRelation = LovePartnerRelationUtility.ExistingMostLikedLovePartnerRel(p, false);
 				bool multiplePartners = (from r in p.relations.PotentiallyRelatedPawns where LovePartnerRelationUtility.LovePartnerRelationExists(p, r) select r).Count() > 1;
-				bool partnerBedInRoom = (from t in p.ownership.OwnedBed.GetRoom().ContainedBeds where t.AssignedPawns.Contains(directPawnRelation.otherPawn) select t).Count() > 0;
+				bool partnerBedInRoom = (from t in p.ownership.OwnedBed.GetRoom().ContainedBeds where t.CurOccupants.Contains(directPawnRelation.otherPawn) select t).Count() > 0;
 				if (directPawnRelation != null && p.ownership.OwnedBed != null && p.story.traits.HasTrait(RRRTraitDefOf.Polyamorous) && multiplePartners && partnerBedInRoom) {
 					__result = false;
 				}
@@ -1015,10 +1015,11 @@ namespace RationalRomance_Code {
 
 	public class InteractionWorker_NullWorker : InteractionWorker {
 		public InteractionWorker_NullWorker() { }
-		public override void Interacted(Pawn initiator, Pawn recipient, List<RulePackDef> extraSentencePacks, out string letterText, out string letterLabel, out LetterDef letterDef) {
+		public override void Interacted(Pawn initiator, Pawn recipient, List<RulePackDef> extraSentencePacks, out string letterText, out string letterLabel, out LetterDef letterDef, out LookTargets lookTargets) {
 			letterLabel = null;
 			letterText = null;
 			letterDef = null;
+            lookTargets = null;
 		}
 		public override float RandomSelectionWeight(Pawn initiator, Pawn recipient) {
 			return 0f;
@@ -1587,13 +1588,13 @@ namespace RationalRomance_Code {
 		public static Building_Bed FindHookupBed(Pawn p1, Pawn p2) {
 			Building_Bed result;
 			if (p1.ownership.OwnedBed != null) {
-				if (p1.ownership.OwnedBed.MaxAssignedPawnsCount > 1) {
+				if (p1.ownership.OwnedBed.SleepingSlotsCount > 1) {
 					result = p1.ownership.OwnedBed;
 					return result;
 				}
 			}
 			if (p2.ownership.OwnedBed != null) {
-				if (p2.ownership.OwnedBed.MaxAssignedPawnsCount > 1) {
+				if (p2.ownership.OwnedBed.SleepingSlotsCount > 1) {
 					result = p2.ownership.OwnedBed;
 					return result;
 				}

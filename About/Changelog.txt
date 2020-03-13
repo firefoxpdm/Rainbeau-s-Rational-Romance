@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------
   Changelog for "Rainbeau's Rational Romance"
 ---------------------------------------------------------------------------------
+- 2020-03-13
+    - Updated to 1.1
 
 - 12/05/2018
 	- Made some more minor tweaks to the date functionality.
